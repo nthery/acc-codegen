@@ -39,13 +39,14 @@ test() {
 # All test cases
 #
 
-test 7 		7
-test 72+ 	9
-test 72+ 	9
-test 12+3+ 	6
-test 12+3+ 	6
-test 123*+ 	7
-test 12+3* 	9
-test 12345++++  15
-test 12*34*+	14
-test "1;2"	2
+test 7 			7
+test 72+ 		9
+test 12+3+ 		6
+test 123*+ 		7
+test 12+3* 		9
+test 12345++++  	15
+test 12*34*+		14
+test "1;2"		2
+test a			0
+test "a2=;a1+"		3
+test "ba2==;b1+"	3
