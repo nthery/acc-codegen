@@ -6,7 +6,7 @@
 //! and spaces between tokens are not allowed.
 //!
 //! Grammar:
-//! program -> expr '\0'
+//! program -> expr | program ';' expr
 //! expr -> primary | expr binary_operator expr
 //! primary -> digit
 //! binary_operator -> '+' | '*'
@@ -30,6 +30,7 @@ fn compile(input: &str) {
             '0'..='9' => cg.number(ch.to_digit(10).unwrap()),
             '+' => cg.add(),
             '*' => cg.mul(),
+            ';' => cg.end_of_expr(),
             _ => panic!("unexpected input: {}", ch),
         }
     }
@@ -63,13 +64,17 @@ impl CodeGen {
     }
 
     fn epilogue(&mut self) {
-        // Single term expression?
-        if let Some(Location::OnOperandStack(n)) = self.stack.pop() {
-            println!("\tmov eax, {}", n);
-        }
-        debug_assert_eq!(self.stack.len(), 0);
-
+        self.end_of_expr();
         println!("\tret");
+    }
+
+    fn end_of_expr(&mut self) {
+        match self.stack.pop() {
+            Some(Location::OnOperandStack(n)) => println!("\tmov eax, {}", n),
+            Some(Location::OnCpuStack) => panic!("unbalanced stack: {:?}", self.stack),
+            Some(Location::InAccumulator) | None => (),
+        }
+        assert_eq!(self.stack.len(), 0);
     }
 
     fn number(&mut self, n: u32) {
