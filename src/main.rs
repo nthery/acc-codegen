@@ -157,6 +157,12 @@ impl CodeGen {
                 emit_binop(&r.to_string());
                 self.stack.push(Location::InAccumulator);
             }
+            (Location::OnOperandStack(l), Location::InAccumulator) => {
+                println!("\tmov ebx, eax");
+                println!("\tmov eax, {}", l);
+                emit_binop("ebx");
+                self.stack.push(Location::InAccumulator);
+            }
             (Location::InAccumulator, Location::OnOperandStack(r)) => {
                 emit_binop(&r.to_string());
                 self.stack.push(Location::InAccumulator);
@@ -177,15 +183,11 @@ impl CodeGen {
         let rhs = self.stack.pop().unwrap();
         let lhs = self.stack.pop().unwrap();
 
-        // Spill pending operands for lower-precedence operators.
+        // Spill partial result for lower-precedence operation.
         let len = self.stack.len();
         for (i, ol) in self.stack.iter_mut().enumerate() {
             match ol {
-                Location::OnOperandStack(Operand::Integer(n)) => {
-                    println!("\tmov rax, {}", n);
-                    println!("\tpush rax");
-                    *ol = Location::OnCpuStack;
-                }
+                Location::OnOperandStack(Operand::Integer(_)) => {}
                 Location::OnOperandStack(Operand::Variable(_)) => {}
                 Location::OnCpuStack => (),
                 Location::InAccumulator => {
