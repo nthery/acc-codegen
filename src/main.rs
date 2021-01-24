@@ -7,7 +7,7 @@
 //!
 //! Grammar:
 //! program -> expr | program ';' expr
-//! expr -> primary | expr binary_operator expr
+//! expr -> primary | expr expr binary_operator
 //! primary -> digit
 //! binary_operator -> '+' | '*'
 
@@ -38,6 +38,7 @@ fn compile(input: &str) {
 }
 
 /// Naive code generator.
+/// Exposes "semantic actions" called from the parser.
 #[derive(Debug)]
 struct CodeGen {
     // Keeps track of location of all terms of expression to generate code for.
@@ -93,10 +94,13 @@ impl CodeGen {
     }
 
     fn binop<F: FnOnce(&str)>(&mut self, emit_binop: F) {
-        debug_assert!(self.stack.len() >= 2);
+        // Get location of operands.
+        let len = self.stack.len();
+        debug_assert!(len >= 2);
         let rhs = self.stack.pop().unwrap();
         let lhs = self.stack.pop().unwrap();
-        let len = self.stack.len();
+
+        // Spill pending operands for lower-precedence operators.
         for (i, o) in self.stack.iter_mut().enumerate() {
             match o {
                 Location::OnOperandStack(n) => {
@@ -112,6 +116,8 @@ impl CodeGen {
                 }
             }
         }
+
+        // Emit operation
         match (lhs, rhs) {
             (Location::OnOperandStack(l), Location::OnOperandStack(r)) => {
                 println!("\tmov eax, {}", l);
