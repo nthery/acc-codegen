@@ -34,6 +34,7 @@ fn compile(input: &str) {
             '0'..='9' => cg.number(ch.to_digit(10).unwrap()),
             'a'..='z' | 'A'..='Z' => cg.variable(ch),
             '+' => cg.add(),
+            '-' => cg.sub(),
             '*' => cg.mul(),
             ';' => cg.end_of_expr(),
             '=' => cg.assign(),
@@ -124,6 +125,10 @@ impl CodeGen {
 
     fn add(&mut self) {
         self.rvalue_binop(|n| println!("\tadd eax, {}", n));
+    }
+
+    fn sub(&mut self) {
+        self.rvalue_binop(|n| println!("\tsub eax, {}", n));
     }
 
     fn mul(&mut self) {

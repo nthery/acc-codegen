@@ -41,9 +41,12 @@ test() {
 
 test 7 			7
 test 72+ 		9
+test 97-		2
+test 79-		-2
 test 12+3+ 		6
 test 123*+ 		7
 test 12+3* 		9
+test 79-3*		-6
 test 12345++++  	15
 test 12*34*+		14
 test "1;2"		2
